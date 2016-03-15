@@ -79,6 +79,12 @@ class Ray_Unlisted_Posts {
 			return $posts;
 		}
 
+		// Add unlock dashicon to unlisted post title.
+		add_filter( 'private_title_format', array( $this, 'remove_private_from_posttitle' ) );
+		add_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ) );
+		add_action( 'wp_enqueue_scripts',   array( $this, 'enqueue_dashicons' ) );
+		add_action( 'wp_head',              array( $this, 'inline_css' ) );
+
 		// Need to be a single post, and not the comments feed.
 		if ( ! $wp_query->is_single || $wp_query->is_feed ) {
 			return $posts;
@@ -94,12 +100,6 @@ class Ray_Unlisted_Posts {
 
 		// Add noindex, nofollow robots.
 		add_filter( 'pre_option_blog_public', '__return_zero' );
-
-		// Add unlock dashicon to unlisted post title.
-		add_filter( 'private_title_format', array( $this, 'remove_private_from_posttitle' ) );
-		add_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ) );
-		add_action( 'wp_enqueue_scripts',   array( $this, 'enqueue_dashicons' ) );
-		add_action( 'wp_head',              array( $this, 'inline_css' ) );
 
 		/**
 		 * Hook for devs to do stuff on an unlisted post.
@@ -177,7 +177,7 @@ class Ray_Unlisted_Posts {
 	 */
 	public function add_icon_to_posttitle( $retval ) {
 		// Only do this once!
-		if ( did_action( 'the_post' ) ) {
+		if ( did_action( 'the_post' ) && is_singular() ) {
 			remove_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ) );
 		}
 
