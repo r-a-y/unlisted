@@ -19,8 +19,8 @@ add_action( 'plugins_loaded', array( 'Ray_Unlisted_Posts', 'init' ) );
  *
  * Changes:
  * - Add ability to set "Visibility" to "Unlisted" in the admin post UI.
- * - Switch unlisted check from category to post meta instead.
  * - Unlisted posts are private by default.
+ * - Record unlisted status as post meta.
  * - Fixed commenting on unlisted posts.
  * - Removed post content injection. Using dashicon in post title instead to
  *   denote unlisted status.
