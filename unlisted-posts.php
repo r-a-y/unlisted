@@ -91,7 +91,7 @@ class Ray_Unlisted_Posts {
 		}
 
 		// Not unlisted? Bail!
-		if ( false === self::is_unlisted( $posts[0]->ID ) ) {
+		if ( empty( $posts[0] ) || false === self::is_unlisted( $posts[0]->ID ) ) {
 			return $posts;
 		}
 
