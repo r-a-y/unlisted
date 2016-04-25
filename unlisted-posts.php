@@ -35,7 +35,7 @@ class Ray_Unlisted_Posts {
 	/**
 	 * Static initializer.
 	 */
-	static public function init() {
+	public static function init() {
 		return new self();
 	}
 
