@@ -81,7 +81,7 @@ class Ray_Unlisted_Posts {
 
 		// Add unlock dashicon to unlisted post title.
 		add_filter( 'private_title_format', array( $this, 'remove_private_from_posttitle' ) );
-		add_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ) );
+		add_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ), 10, 2 );
 		add_action( 'wp_enqueue_scripts',   array( $this, 'enqueue_dashicons' ) );
 		add_action( 'wp_head',              array( $this, 'inline_css' ) );
 
@@ -172,17 +172,25 @@ class Ray_Unlisted_Posts {
 	/**
 	 * Adds unlock dashicon to the post title.
 	 *
-	 * @param  string $retval Current title format.
+	 * @param  string  $retval Current title format.
+	 * @param  WP_Post $post   Current WP post object.
 	 * @return string
 	 */
-	public function add_icon_to_posttitle( $retval ) {
+	public function add_icon_to_posttitle( $retval, $post ) {
 		// Only do this once!
 		if ( did_action( 'the_post' ) && is_singular() ) {
 			remove_filter( 'private_title_format', array( $this, 'add_icon_to_posttitle' ) );
 		}
 
-		$title = esc_attr__( 'This post is unlisted. Only those with the link can view it.', 'unlisted-posts' );
-		return '<span class="dashicons dashicons-unlock unlisted-icon" title="' . $title . '"></span>%s';
+		if ( self::is_unlisted( $post->ID ) ) {
+			$class = 'unlock';
+			$title = esc_attr__( 'This post is unlisted. Only those with the link can view it.', 'unlisted-posts' );
+		} else {
+			$class = 'lock';
+			$title = esc_attr__( 'This post is private. Only you can view this post.', 'unlisted-posts' );
+		}
+
+		return '<span class="dashicons unlisted-icon dashicons-' . $class . '" title="' . $title . '"></span>%s';
 	}
 
 	/**
