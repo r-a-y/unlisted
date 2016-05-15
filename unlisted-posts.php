@@ -21,6 +21,7 @@ add_action( 'plugins_loaded', array( 'Ray_Unlisted_Posts', 'init' ) );
  * - Add ability to set "Visibility" to "Unlisted" in the admin post UI.
  * - Unlisted posts are private by default.
  * - Record unlisted status as post meta.
+ * - Add oEmbed support for unlisted posts.
  * - Fixed commenting on unlisted posts.
  * - Removed post content injection. Using dashicon in post title instead to
  *   denote unlisted status.
@@ -31,6 +32,11 @@ class Ray_Unlisted_Posts {
 	 * @var bool|null Internal marker to see if we should restore post back to 'private'.
 	 */
 	private $restore = null;
+
+	/**
+	 * @var bool Internal marker to see if a REST dispatch request is about to be made.
+	 */
+	private $is_rest_dispatch = false;
 
 	/**
 	 * Static initializer.
@@ -62,6 +68,11 @@ class Ray_Unlisted_Posts {
 
 		// Privacy hook.
 		add_filter( 'redirect_canonical', array( $this, 'check_for_shortlink' ), 10, 2 );
+
+		// Embeds.
+		add_filter( 'rest_dispatch_request', array( $this, 'set_marker_before_dispatch' ), 10, 2 );
+		add_filter( 'get_post_status',       array( $this, 'oembed_pass_post_status_checks' ), 10, 2 );
+		add_filter( 'oembed_response_data',  array( $this, 'oembed_response_data' ) );
 	}
 
 	/**
@@ -391,5 +402,66 @@ class Ray_Unlisted_Posts {
 	 */
 	public function set_redirect_status_to_temporary( $retval ) {
 		return 307;
+	}
+
+	/** EMBEDS ***************************************************************/
+
+	/**
+	 * Determine if we're doing a embed dispatch.
+	 *
+	 * @param null|mixed      $retval  Dispatch result, will be used if not empty.
+	 * @param WP_REST_Request $request Request used to generate the response.
+	 * @return null|mixed
+	 */
+	public function set_marker_before_dispatch( $retval, $request ) {
+		// Not an oEmbed REST request, so bail.
+		if ( 0 !== strpos( $request->get_route(), '/oembed/' ) ) {
+			return $retval;
+		}
+
+		// Not a post embed attempt, so bail.
+		if ( 0 !== substr_compare( $request->get_route(), 'embed', -5 ) ) {
+			return $retval;
+		}
+
+		// Set our rest dispatch property to true.
+		$this->is_rest_dispatch = true;
+
+		return $retval;
+	}
+
+	/**
+	 * Force post status checks to 'publish' during unlisted post embed attempts.
+	 *
+	 * This passes the url_to_postid() and get_oembed_response_data() checks.
+	 *
+	 * @param  string  $retval Current post status.
+	 * @param  WP_Post $post   Current WP post object.
+	 * @return string
+	 */
+	public function oembed_pass_post_status_checks( $retval, $post ) {
+		// We're not running a REST API request, so bail.
+		if ( false === $this->is_rest_dispatch ) {
+			return $retval;
+		}
+
+		// Don't do anything if not an unlisted post.
+		if ( false === self::is_unlisted( $post->ID ) ) {
+			return $retval;
+		}
+
+		// Force to 'publish'.
+		return 'publish';
+	}
+
+	/**
+	 * Remove our hackery after the oEmbed response is done!
+	 *
+	 * @param  array $retval The oEmbed response data.
+	 * @return array
+	 */
+	public function oembed_response_data( $retval ) {
+		remove_filter( 'get_post_status', array( $this, 'oembed_pass_post_status_checks' ), 10, 2 );
+		return $retval;
 	}
 }
