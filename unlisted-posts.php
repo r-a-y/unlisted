@@ -256,6 +256,10 @@ class Ray_Unlisted_Posts {
 	 * @return bool
 	 */
 	public static function is_unlisted( $post_id = 0 ) {
+		if ( empty( $post_id ) ) {
+			$post_id = get_queried_object_id();
+		}
+
 		$unlisted = get_post_meta( $post_id, 'ray_unlisted', true );
 
 		if ( empty( $unlisted ) ) {
