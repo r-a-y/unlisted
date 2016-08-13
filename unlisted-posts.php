@@ -86,7 +86,7 @@ class Ray_Unlisted_Posts {
 	 */
 	public function post_results( $posts, $wp_query ) {
 		// Make sure this is the main query.
-		if ( $wp_query !== $GLOBALS['wp_the_query'] ) {
+		if ( false === $wp_query->is_main_query() ) {
 			return $posts;
 		}
 
@@ -120,7 +120,7 @@ class Ray_Unlisted_Posts {
 		do_action( 'ray_unlisted_post_ready', $this );
 
 		// Restore.
-		add_filter( 'the_posts', array( $this, 'the_posts' ) );
+		add_filter( 'the_posts', array( $this, 'the_posts' ), 10, 2 );
 		$this->restore = $posts[0];
 
 		return $posts;
@@ -132,10 +132,16 @@ class Ray_Unlisted_Posts {
 	 * This is where we restore the unlisted post status from 'public' back to
 	 * 'private'.
 	 *
-	 * @param  array $posts Array of retrieved posts.
+	 * @param  array    $posts    Array of retrieved posts.
+	 * @param  WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function the_posts( $posts ) {
+	public function the_posts( $posts, $wp_query ) {
+		// Make sure this is the main query.
+		if ( false === $wp_query->is_main_query() ) {
+			return $posts;
+		}
+
 		if ( $posts[0] === $this->restore ) {
 			$posts[0]->post_status = 'private';
 			$this->restore = null;
