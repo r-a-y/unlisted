@@ -136,7 +136,7 @@ class Ray_Unlisted_Posts {
 	 * @return array
 	 */
 	public function the_posts( $posts ) {
-		if ( $posts[0] === $this->restore ) {
+		if ( count($posts) > 0 && $posts[0] === $this->restore ) {
 			$posts[0]->post_status = 'private';
 			$this->restore = null;
 		}
