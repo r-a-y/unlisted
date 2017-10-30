@@ -300,7 +300,7 @@ class Ray_Unlisted_Posts {
 	?>
 
 		<div id="post-visibility-unlisted" style="display:none;">
-			<input type="hidden" id="ray-unlisted" name="ray_unlisted" value="<?php esc_attr_e( $unlisted ); ?>" />
+			<input type="hidden" id="ray-unlisted" name="ray_unlisted" value="<?php echo $unlisted; ?>" />
 			<input type="radio" name="visibility" id="visibility-radio-unlisted" value="private" <?php checked( $unlisted, 1 ); ?> /> <label for="visibility-radio-unlisted" class="selectit"><?php _e( 'Unlisted', 'unlisted-posts' ); ?></label><br />
 		</div>
 
