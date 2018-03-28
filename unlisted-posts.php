@@ -97,7 +97,7 @@ class Ray_Unlisted_Posts {
 		add_action( 'wp_head',              array( $this, 'inline_css' ) );
 
 		// Need to be a single post, and not the comments feed.
-		if ( ! $wp_query->is_single || $wp_query->is_feed ) {
+		if ( ! $wp_query->is_singular || $wp_query->is_feed ) {
 			return $posts;
 		}
 
