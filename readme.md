@@ -4,7 +4,7 @@
 
 A WordPress plugin that adds an "Unlisted" visibility option.  Based from [preliminary work](https://gist.github.com/nacin/4f4bc2d18a66c1eff93a)) by nacin.
 
-Requires WordPress 4.4+.
+Requires WordPress 4.4+, PHP 5.6+.
 
 ### How to use?
 
