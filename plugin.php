@@ -99,26 +99,38 @@ function rest_oembed( $retval, $server, $request ) {
 }
 add_filter( 'rest_request_before_callbacks', __NAMESPACE__ . '\\rest_oembed', 10, 3 );
 
-/**
- * Add compatibility for the Classic Editor.
- */
-function load_classic() {
-	require_once  DIR . '/hooks/classic.php';
-}
-add_action( 'post_submitbox_minor_actions', __NAMESPACE__ . '\\load_classic' );
+
+/* GUTENBERG ********************************************************/
 
 /**
- * Saves our unlisted option if selected in the Classic Editor.
- *
- * @todo This needs an audit to see if it conflicts with Gutenberg.
- *
- * @param int $post_id Post ID.
+ * Register our post meta for Gutenberg support.
  */
-function save_unlisted_option( $post_id ) {
-	if ( empty( $_POST['ray_unlisted'] ) ) {
-		delete_post_meta( $post_id, 'ray_unlisted' );
-	} else {
-		update_post_meta( $post_id, 'ray_unlisted', 1 );
-	}
+function register_meta() {
+	\register_meta( 'post', 'ray_unlisted', array(
+		'show_in_rest' => true,
+		'single'       => true,
+		'type'         => 'boolean',
+	) );
 }
-add_action( 'wp_insert_post', __NAMESPACE__ . '\\save_unlisted_option' );
+add_action( 'init', __NAMESPACE__ . '\\register_meta' );
+
+/**
+ * Register our assets for Gutenberg support.
+ */
+function register_assets() {
+	wp_register_script( 'ray-unlisted-posts', plugin_dir_url( __FILE__ ) . 'assets/gutenberg.js', array(
+		'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-compose', 'wp-data'
+	) );
+
+	wp_register_style( 'ray-unlisted-posts', plugin_dir_url( __FILE__ ) . 'assets/gutenberg.css' );
+}
+add_action( 'init', __NAMESPACE__ . '\\register_assets' );
+
+/**
+ * Enqueue our assets for Gutenberg support.
+ */
+function block_enqueue_assets() {
+	wp_enqueue_script( 'ray-unlisted-posts' );
+	wp_enqueue_style( 'ray-unlisted-posts' );
+}
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\block_enqueue_assets' );

@@ -1,0 +1,9 @@
+.ray-unlisted {
+	position: relative;
+}
+
+.ray-unlisted input[type="checkbox"] {
+	position: absolute;
+	top: 3px;
+	right: -12px;
+}
