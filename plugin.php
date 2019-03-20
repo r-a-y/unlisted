@@ -134,3 +134,27 @@ function block_enqueue_assets() {
 	wp_enqueue_style( 'ray-unlisted-posts' );
 }
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\block_enqueue_assets' );
+
+/**
+ * Add compatibility for the Classic Editor.
+ */
+function load_classic() {
+	require_once  DIR . '/hooks/classic.php';
+}
+add_action( 'post_submitbox_minor_actions', __NAMESPACE__ . '\\load_classic' );
+
+/**
+ * Saves our unlisted option if selected in the Classic Editor.
+ *
+ * @todo This needs an audit to see if it conflicts with Gutenberg.
+ *
+ * @param int $post_id Post ID.
+ */
+function save_unlisted_option( $post_id ) {
+	if ( empty( $_POST['ray_unlisted'] ) ) {
+		delete_post_meta( $post_id, 'ray_unlisted' );
+	} else {
+		update_post_meta( $post_id, 'ray_unlisted', 1 );
+	}
+}
+add_action( 'wp_insert_post', __NAMESPACE__ . '\\save_unlisted_option' );
