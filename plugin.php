@@ -120,7 +120,7 @@ add_action( 'init', __NAMESPACE__ . '\\register_meta' );
 function register_assets() {
 	wp_register_script( 'ray-unlisted-posts', plugin_dir_url( __FILE__ ) . 'assets/gutenberg.js', array(
 		'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-compose', 'wp-data'
-	) );
+	), '20190509' );
 
 	wp_register_style( 'ray-unlisted-posts', plugin_dir_url( __FILE__ ) . 'assets/gutenberg.css' );
 }
